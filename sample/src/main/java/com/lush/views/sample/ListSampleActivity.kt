@@ -2,14 +2,17 @@ package com.lush.views.sample
 
 import android.graphics.Color
 import android.os.Bundle
+import android.support.v7.util.DiffUtil
 import android.support.v7.widget.LinearLayoutManager
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import com.lush.lib.adapter.BaseSelectableListAdapter
 import com.lush.lib.listener.OnListItemClickListener
+import com.lush.lib.model.BaseModel
 import com.lush.view.holder.BaseSelectableViewHolder
 import com.lush.view.holder.BaseViewHolder
+import com.lush.views.sample.R.id.list
 import com.lush.views.sample.base.BaseSampleActivity
 import kotlinx.android.synthetic.main.activity_list.*
 import kotlinx.android.synthetic.main.item_person.view.*
@@ -36,7 +39,7 @@ class ListSampleActivity: BaseSampleActivity(), OnListItemClickListener<Person>
 				Person("Indiana", "Jones")
 		)
 
-		adapter = PersonAdapter(items, this)
+		adapter = PersonAdapter(, items, this)
 		list.adapter = adapter
 		list.layoutManager = LinearLayoutManager(this)
 	}
@@ -54,13 +57,10 @@ class ListSampleActivity: BaseSampleActivity(), OnListItemClickListener<Person>
 	}
 }
 
-class PersonAdapter(items: ArrayList<Person> = ArrayList(), listener: OnListItemClickListener<Person>? = null): BaseSelectableListAdapter<Person>(items, listener)
+class PersonAdapter(itemCallback: DiffUtil.ItemCallback<Person>, listener: OnListItemClickListener<Person>? = null): BaseSelectableListAdapter<Person, PersonViewHolder>(listener, itemCallback)
 {
-	override fun onCreateViewHolder(parent: ViewGroup?, viewType: Int): BaseViewHolder<Person>
-	{
-		val view = LayoutInflater.from(parent?.context).inflate(R.layout.item_person, parent, false)
-		return PersonViewHolder(view)
-	}
+	override fun getLayout(): Int = R.layout.item_person
+	override fun createViewHolder(view: View): PersonViewHolder = PersonViewHolder(view)
 }
 
 class PersonViewHolder(view: View): BaseSelectableViewHolder<Person>(view)
@@ -79,4 +79,15 @@ class PersonViewHolder(view: View): BaseSelectableViewHolder<Person>(view)
 	}
 }
 
-data class Person(val name: String, val surname: String)
+data class Person(val name: String, val surname: String): BaseModel<Person>()
+{
+	override fun areItemsTheSame(oldItem: Person?, newItem: Person?): Boolean
+	{
+		return oldItem?.name == newItem?.name
+	}
+
+	override fun areContentsTheSame(oldItem: Person?, newItem: Person?): Boolean
+	{
+		return oldItem == newItem
+	}
+}
